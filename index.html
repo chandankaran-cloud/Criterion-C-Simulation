@@ -605,41 +605,7 @@
       <span id="status">Select trolley mass and launch vehicle.</span>
     </div>
   </div>
-
-  <!-- Section 3: Data Table & CSV Export -->
-  <div class="card">
-    <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
-      <h2 class="mb-0"><span class="step-num">3</span> Experimental Data Log</h2>
-      <div class="flex gap-2">
-        <button id="exportCsvBtn" class="secondary text-xs py-1.5 px-3">
-          <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
-          Export CSV
-        </button>
-        <button id="clearDataBtn" class="danger text-xs py-1.5 px-3">Clear Data</button>
-      </div>
-    </div>
-    
-    <div class="overflow-x-auto">
-      <table class="w-full text-left text-sm text-slate-300">
-        <thead class="bg-slate-800/80 text-slate-400 uppercase text-xs">
-          <tr>
-            <th class="py-2.5 px-3 rounded-l">Trial #</th>
-            <th class="py-2.5 px-3">Mass (kg)</th>
-            <th class="py-2.5 px-3">Velocity (m/s)</th>
-            <th class="py-2.5 px-3">Kinetic Energy (J)</th>
-            <th class="py-2.5 px-3 rounded-r">Rebound Distance (cm)</th>
-          </tr>
-        </thead>
-        <tbody id="dataTableBody" class="divide-y divide-slate-800 font-mono">
-          <tr id="emptyRow">
-            <td colspan="5" class="py-4 text-center text-slate-500 italic font-sans">No trials recorded yet. Launch the trolley to log data.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- Section 4: Scientific Conclusion -->
+  <!-- Section 3: Scientific Conclusion -->
   <div class="card">
     <h2><span class="step-num">4</span> Scientific Analysis</h2>
     <div class="conclusion-box" id="conclusion">
