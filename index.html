@@ -1,947 +1,924 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trolley Collision Lab: Mass vs Rebound Distance</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    :root {
-      --bg-main: #090d16;
-      --card-bg: #111827;
-      --card-border: #1f293d;
-      --accent-cyan: #06b6d4;
-      --accent-blue: #3b82f6;
-      --accent-green: #10b981;
-      --accent-red: #ef4444;
-      --accent-yellow: #f59e0b;
-      --accent-purple: #8b5cf6;
-      --text-main: #f3f4f6;
-      --text-muted: #9ca3af;
-      --radius-lg: 16px;
-      --radius-md: 10px;
-      --glow-cyan: 0 0 15px rgba(6, 182, 212, 0.35);
-      --glow-green: 0 0 15px rgba(16, 185, 129, 0.4);
-      --glow-yellow: 0 0 15px rgba(245, 158, 11, 0.4);
-    }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trolley Collision Lab: Mass vs Rebound Distance</title>
+  <style>
+    :root {
+      --bg-main: #090d16;
+      --card-bg: #111827;
+      --card-border: #1f293d;
+      --accent-cyan: #06b6d4;
+      --accent-blue: #3b82f6;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-yellow: #f59e0b;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --radius-lg: 16px;
+      --radius-md: 10px;
+      --glow-cyan: 0 0 15px rgba(6, 182, 212, 0.35);
+      --glow-green: 0 0 15px rgba(16, 185, 129, 0.4);
+      --glow-yellow: 0 0 15px rgba(245, 158, 11, 0.4);
+    }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--bg-main);
-      color: var(--text-main);
-      padding: 24px 16px;
-      min-height: 100vh;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    .wrap {
-      max-width: 1000px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
 
-    /* Header */
-    header {
-      background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
-      border: 1px solid var(--card-border);
-      padding: 24px 30px;
-      border-radius: var(--radius-lg);
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
-    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      padding: 24px 16px;
+      min-height: 100vh;
+    }
 
-    header::before {
-      content: "";
-      position: absolute;
-      top: -50px;
-      right: -50px;
-      width: 160px;
-      height: 160px;
-      background: radial-gradient(circle, rgba(6, 182, 212, 0.2) 0%, transparent 70%);
-      pointer-events: none;
-    }
 
-    header .badge {
-      display: inline-block;
-      background: rgba(6, 182, 212, 0.15);
-      color: #67e8f9;
-      font-size: 0.8rem;
-      font-weight: 700;
-      padding: 4px 12px;
-      border-radius: 20px;
-      margin-bottom: 8px;
-      letter-spacing: 0.8px;
-      text-transform: uppercase;
-      border: 1px solid rgba(6, 182, 212, 0.3);
-    }
+    .wrap {
+      max-width: 920px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
 
-    header h1 {
-      font-size: 1.8rem;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      margin-bottom: 4px;
-      background: linear-gradient(to right, #ffffff, #93c5fd);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
 
-    header p { color: var(--text-muted); font-size: 0.95rem; }
+    /* Header */
+    header {
+      background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+      border: 1px solid var(--card-border);
+      padding: 24px 30px;
+      border-radius: var(--radius-lg);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+    }
 
-    /* Cards */
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius-lg);
-      padding: 24px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-    }
 
-    .card h2 {
-      font-size: 1.15rem;
-      font-weight: 700;
-      margin-bottom: 18px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+    header::before {
+      content: "";
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 160px;
+      height: 160px;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.2) 0%, transparent 70%);
+      pointer-events: none;
+    }
 
-    .step-num {
-      background: rgba(6, 182, 212, 0.15);
-      color: var(--accent-cyan);
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.85rem;
-      font-weight: 800;
-      border: 1px solid rgba(6, 182, 212, 0.3);
-    }
 
-    /* Controls Grid */
-    .controls-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      align-items: end;
-    }
+    header .badge {
+      display: inline-block;
+      background: rgba(6, 182, 212, 0.15);
+      color: #67e8f9;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 8px;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      border: 1px solid rgba(6, 182, 212, 0.3);
+    }
 
-    .input-group label {
-      display: block;
-      font-weight: 600;
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
 
-    .slider-row { display: flex; align-items: center; gap: 12px; }
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 4px;
+      background: linear-gradient(to right, #ffffff, #93c5fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
 
-    input[type="range"] {
-      flex: 1;
-      height: 6px;
-      border-radius: 3px;
-      background: #1f293d;
-      accent-color: var(--accent-cyan);
-      cursor: pointer;
-    }
 
-    input[type="number"] {
-      width: 72px;
-      padding: 8px;
-      font-size: 0.95rem;
-      font-weight: 700;
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius-md);
-      text-align: center;
-      background: #0b0f19;
-      color: white;
-      outline: none;
-    }
+    header p { color: var(--text-muted); font-size: 0.95rem; }
 
-    input[type="number"]:focus {
-      border-color: var(--accent-cyan);
-    }
 
-    .metric-badge {
-      background: #0b0f19;
-      border: 1px solid var(--card-border);
-      padding: 10px 14px;
-      border-radius: var(--radius-md);
-      font-size: 0.95rem;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 44px;
-      transition: all 0.3s ease;
-    }
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
 
-    .metric-badge.revealed {
-      background: rgba(245, 158, 11, 0.15);
-      border-color: var(--accent-yellow);
-      color: #fbbf24;
-      box-shadow: var(--glow-yellow);
-    }
 
-    .metric-badge.hidden-state {
-      color: var(--text-muted);
-      font-style: italic;
-      font-weight: 500;
-      font-size: 0.85rem;
-    }
+    .card h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-    .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
 
-    button {
-      font-size: 0.9rem;
-      font-weight: 700;
-      padding: 10px 18px;
-      border-radius: var(--radius-md);
-      border: none;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
+    .step-num {
+      background: rgba(6, 182, 212, 0.15);
+      color: var(--accent-cyan);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 800;
+      border: 1px solid rgba(6, 182, 212, 0.3);
+    }
 
-    button.primary {
-      background: var(--accent-cyan);
-      color: #042f2e;
-      box-shadow: var(--glow-cyan);
-    }
-    button.primary:hover:not(:disabled) { background: #22d3ee; transform: translateY(-1px); }
-    button.secondary { background: rgba(59, 130, 246, 0.15); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.3); }
-    button.secondary:hover { background: rgba(59, 130, 246, 0.25); }
-    button.danger { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
-    button.danger:hover { background: rgba(239, 68, 68, 0.25); }
 
-    button:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+    /* Controls Grid */
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      align-items: end;
+    }
 
-    /* Track Layout */
-    .track-wrapper {
-      position: relative;
-      height: 230px;
-      background: radial-gradient(circle at 50% 30%, #1e293b 0%, #0b0f19 100%);
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--card-border);
-      overflow: hidden;
-      margin-bottom: 12px;
-      box-shadow: inset 0 4px 15px rgba(0,0,0,0.6);
-    }
 
-    .track-grid {
-      position: absolute;
-      inset: 0;
-      background-size: 30px 30px;
-      background-image: 
-        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-    }
+    .input-group label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
 
-    /* Ruler Measurement Track */
-    .ruler-track {
-      position: absolute;
-      left: 20%;
-      right: 15%;
-      bottom: 50px;
-      height: 18px;
-      display: flex;
-      justify-content: space-between;
-      border-top: 1px solid rgba(6, 182, 212, 0.4);
-      z-index: 2;
-    }
 
-    .ruler-tick {
-      position: relative;
-      width: 1px;
-      height: 6px;
-      background: rgba(148, 163, 184, 0.4);
-    }
+    .slider-row { display: flex; align-items: center; gap: 12px; }
 
-    .ruler-tick.major {
-      height: 12px;
-      background: var(--accent-cyan);
-    }
 
-    .ruler-tick.major::after {
-      content: attr(data-cm) "cm";
-      position: absolute;
-      top: 14px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 0.65rem;
-      font-weight: 700;
-      color: var(--text-muted);
-    }
+    input[type="range"] {
+      flex: 1;
+      height: 6px;
+      border-radius: 3px;
+      background: #1f293d;
+      accent-color: var(--accent-cyan);
+      cursor: pointer;
+    }
 
-    .track-floor {
-      position: absolute;
-      left: 0; right: 0; bottom: 0;
-      height: 50px;
-      background: #111827;
-      border-top: 3px solid var(--accent-cyan);
-      box-shadow: 0 -4px 12px rgba(6, 182, 212, 0.2);
-    }
 
-    .start-line {
-      position: absolute;
-      left: 20%;
-      bottom: 50px;
-      width: 3px;
-      height: 90px;
-      background: rgba(6, 182, 212, 0.5);
-      border-right: 1px dashed var(--accent-cyan);
-    }
+    input[type="number"] {
+      width: 72px;
+      padding: 8px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-md);
+      text-align: center;
+      background: #0b0f19;
+      color: white;
+      outline: none;
+    }
 
-    /* Spring Impact Barrier */
-    .barrier-container {
-      position: absolute;
-      left: 85%;
-      bottom: 50px;
-      width: 34px;
-      height: 100px;
-      z-index: 10;
-    }
 
-    .barrier-block {
-      position: absolute;
-      right: 0;
-      bottom: 0;
-      width: 24px;
-      height: 100px;
-      background: linear-gradient(135deg, #1f2937, #111827);
-      border: 2px solid #374151;
-      border-left: 4px solid var(--accent-red);
-      border-radius: 4px;
-      box-shadow: -5px 0 15px rgba(239, 68, 68, 0.3);
-    }
+    input[type="number"]:focus {
+      border-color: var(--accent-cyan);
+    }
 
-    .barrier-spring {
-      position: absolute;
-      left: -12px;
-      top: 35px;
-      width: 14px;
-      height: 30px;
-      transition: transform 0.08s ease;
-      transform-origin: right center;
-    }
 
-    /* Rebound Dimension Measurement Line */
-    .rebound-measure-line {
-      position: absolute;
-      bottom: 145px;
-      height: 24px;
-      border-bottom: 2px solid var(--accent-yellow);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      z-index: 12;
-      pointer-events: none;
-    }
+    .metric-badge {
+      background: #0b0f19;
+      border: 1px solid var(--card-border);
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      font-size: 0.95rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      transition: all 0.3s ease;
+    }
 
-    .rebound-measure-line::before, .rebound-measure-line::after {
-      content: "";
-      position: absolute;
-      bottom: -6px;
-      width: 2px;
-      height: 12px;
-      background: var(--accent-yellow);
-    }
 
-    .rebound-measure-line::before { left: 0; }
-    .rebound-measure-line::after { right: 0; }
+    .metric-badge.revealed {
+      background: rgba(245, 158, 11, 0.15);
+      border-color: var(--accent-yellow);
+      color: #fbbf24;
+      box-shadow: var(--glow-yellow);
+    }
 
-    .rebound-label {
-      background: #0b0f19;
-      border: 1px solid var(--accent-yellow);
-      color: #fbbf24;
-      font-size: 0.78rem;
-      font-weight: 800;
-      padding: 2px 8px;
-      border-radius: 4px;
-      box-shadow: var(--glow-yellow);
-      transform: translateY(-8px);
-      white-space: nowrap;
-    }
 
-    .rebound-measure-line.visible { opacity: 1; }
+    .metric-badge.hidden-state {
+      color: var(--text-muted);
+      font-style: italic;
+      font-weight: 500;
+      font-size: 0.85rem;
+    }
 
-    /* Dynamic Impact Shockwave Effect */
-    .impact-shockwave {
-      position: absolute;
-      left: 83.5%;
-      bottom: 70px;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border: 3px solid var(--accent-yellow);
-      background: radial-gradient(circle, rgba(245, 158, 11, 0.6) 0%, transparent 70%);
-      opacity: 0;
-      transform: scale(0.2);
-      pointer-events: none;
-      z-index: 20;
-      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
 
-    .impact-shockwave.active {
-      opacity: 1;
-      transform: scale(2.8);
-    }
+    .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
 
-    /* Trolley Setup */
-    .trolley-container {
-      position: absolute;
-      bottom: 36px;
-      left: calc(20% - 150px);
-      width: 150px;
-      height: 85px;
-      z-index: 5;
-    }
 
-    .ballast-rack {
-      position: absolute;
-      top: -2px;
-      left: 34px;
-      width: 82px;
-      display: flex;
-      flex-direction: column-reverse;
-      gap: 2px;
-      align-items: center;
-      z-index: 6;
-    }
+    button {
+      font-size: 0.9rem;
+      font-weight: 700;
+      padding: 10px 18px;
+      border-radius: var(--radius-md);
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
 
-    .mass-block {
-      background: linear-gradient(90deg, #334155, #64748b, #334155);
-      border: 1px solid #94a3b8;
-      height: 6px;
-      width: 78px;
-      border-radius: 2px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.6);
-    }
 
-    .status-bar {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+    button.primary {
+      background: var(--accent-cyan);
+      color: #042f2e;
+      box-shadow: var(--glow-cyan);
+    }
+    button.primary:hover:not(:disabled) { background: #22d3ee; transform: translateY(-1px); }
+    button.danger { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
+    button.danger:hover { background: rgba(239, 68, 68, 0.25); }
 
-    .status-dot {
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      background: #374151;
-    }
-    .status-dot.active { background: var(--accent-cyan); box-shadow: var(--glow-cyan); }
-    .status-dot.impact { background: var(--accent-yellow); box-shadow: var(--glow-yellow); }
 
-    .conclusion-box {
-      background: rgba(17, 24, 39, 0.8);
-      border: 1px solid var(--card-border);
-      padding: 18px;
-      border-radius: var(--radius-md);
-      font-size: 0.95rem;
-      line-height: 1.6;
-    }
+    button:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
 
-    .conclusion-box.ready {
-      background: rgba(245, 158, 11, 0.08);
-      border-color: rgba(245, 158, 11, 0.3);
-      color: #fde68a;
-    }
 
-    .note { font-size: 0.82rem; color: var(--text-muted); margin-top: 8px; }
-  </style>
+    /* Track Layout */
+    .track-wrapper {
+      position: relative;
+      height: 230px;
+      background: radial-gradient(circle at 50% 30%, #1e293b 0%, #0b0f19 100%);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--card-border);
+      overflow: hidden;
+      margin-bottom: 12px;
+      box-shadow: inset 0 4px 15px rgba(0,0,0,0.6);
+    }
+
+
+    .track-grid {
+      position: absolute;
+      inset: 0;
+      background-size: 30px 30px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    }
+
+
+    /* Ruler Measurement Track */
+    .ruler-track {
+      position: absolute;
+      left: 20%;
+      right: 15%;
+      bottom: 50px;
+      height: 18px;
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid rgba(6, 182, 212, 0.4);
+      z-index: 2;
+    }
+
+
+    .ruler-tick {
+      position: relative;
+      width: 1px;
+      height: 6px;
+      background: rgba(148, 163, 184, 0.4);
+    }
+
+
+    .ruler-tick.major {
+      height: 12px;
+      background: var(--accent-cyan);
+    }
+
+
+    .ruler-tick.major::after {
+      content: attr(data-cm) "cm";
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+
+    .track-floor {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 50px;
+      background: #111827;
+      border-top: 3px solid var(--accent-cyan);
+      box-shadow: 0 -4px 12px rgba(6, 182, 212, 0.2);
+    }
+
+
+    .start-line {
+      position: absolute;
+      left: 20%;
+      bottom: 50px;
+      width: 3px;
+      height: 90px;
+      background: rgba(6, 182, 212, 0.5);
+      border-right: 1px dashed var(--accent-cyan);
+    }
+
+
+    /* Spring Impact Barrier */
+    .barrier-container {
+      position: absolute;
+      left: 85%;
+      bottom: 50px;
+      width: 34px;
+      height: 100px;
+      z-index: 10;
+    }
+
+
+    .barrier-block {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 24px;
+      height: 100px;
+      background: linear-gradient(135deg, #1f2937, #111827);
+      border: 2px solid #374151;
+      border-left: 4px solid var(--accent-red);
+      border-radius: 4px;
+      box-shadow: -5px 0 15px rgba(239, 68, 68, 0.3);
+    }
+
+
+    .barrier-spring {
+      position: absolute;
+      left: -12px;
+      top: 35px;
+      width: 14px;
+      height: 30px;
+      transition: transform 0.08s ease;
+      transform-origin: right center;
+    }
+
+
+    /* Rebound Dimension Measurement Line */
+    .rebound-measure-line {
+      position: absolute;
+      bottom: 145px;
+      height: 24px;
+      border-bottom: 2px solid var(--accent-yellow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 12;
+      pointer-events: none;
+    }
+
+
+    .rebound-measure-line::before, .rebound-measure-line::after {
+      content: "";
+      position: absolute;
+      bottom: -6px;
+      width: 2px;
+      height: 12px;
+      background: var(--accent-yellow);
+    }
+
+
+    .rebound-measure-line::before { left: 0; }
+    .rebound-measure-line::after { right: 0; }
+
+
+    .rebound-label {
+      background: #0b0f19;
+      border: 1px solid var(--accent-yellow);
+      color: #fbbf24;
+      font-size: 0.78rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 4px;
+      box-shadow: var(--glow-yellow);
+      transform: translateY(-8px);
+      white-space: nowrap;
+    }
+
+
+    .rebound-measure-line.visible { opacity: 1; }
+
+
+    /* Dynamic Impact Shockwave Effect */
+    .impact-shockwave {
+      position: absolute;
+      left: 83.5%;
+      bottom: 70px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 3px solid var(--accent-yellow);
+      background: radial-gradient(circle, rgba(245, 158, 11, 0.6) 0%, transparent 70%);
+      opacity: 0;
+      transform: scale(0.2);
+      pointer-events: none;
+      z-index: 20;
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+
+    .impact-shockwave.active {
+      opacity: 1;
+      transform: scale(2.8);
+    }
+
+
+    /* Trolley Setup */
+    .trolley-container {
+      position: absolute;
+      bottom: 36px;
+      left: calc(20% - 150px);
+      width: 150px;
+      height: 85px;
+      z-index: 5;
+    }
+
+
+    .ballast-rack {
+      position: absolute;
+      top: -2px;
+      left: 34px;
+      width: 82px;
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 2px;
+      align-items: center;
+      z-index: 6;
+    }
+
+
+    .mass-block {
+      background: linear-gradient(90deg, #334155, #64748b, #334155);
+      border: 1px solid #94a3b8;
+      height: 6px;
+      width: 78px;
+      border-radius: 2px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.6);
+    }
+
+
+    .status-bar {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #374151;
+    }
+    .status-dot.active { background: var(--accent-cyan); box-shadow: var(--glow-cyan); }
+    .status-dot.impact { background: var(--accent-yellow); box-shadow: var(--glow-yellow); }
+
+
+    .conclusion-box {
+      background: rgba(17, 24, 39, 0.8);
+      border: 1px solid var(--card-border);
+      padding: 18px;
+      border-radius: var(--radius-md);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+
+    .conclusion-box.ready {
+      background: rgba(245, 158, 11, 0.08);
+      border-color: rgba(245, 158, 11, 0.3);
+      color: #fde68a;
+    }
+
+
+    .note { font-size: 0.82rem; color: var(--text-muted); margin-top: 8px; }
+  </style>
 </head>
 <body>
 
+
 <div class="wrap">
-  <!-- Header -->
-  <header>
-    <span class="badge">IB MYP Physics • Grade 9</span>
-    <h1>Trolley Collision Lab: Mass vs Rebound Distance</h1>
-    <p>Investigate how changing the <strong>Trolley Mass (m)</strong> affects its total <strong>Rebound Distance</strong> after colliding with a spring barrier at a constant launch speed of 2.0 m/s.</p>
-  </header>
+  <!-- Header -->
+  <header>
+    <span class="badge">IB MYP Physics • Grade 9</span>
+    <h1>Trolley Collision Lab: Mass vs Rebound Distance</h1>
+    <p>Investigate how changing the <strong>Trolley Mass (m)</strong> affects its total <strong>Rebound Distance</strong> after colliding with a spring barrier at a constant launch speed of 2.0 m/s.</p>
+  </header>
 
-  <!-- Section 1: Controls -->
-  <div class="card">
-    <h2><span class="step-num">1</span> Setup Parameters</h2>
-    <div class="controls-grid">
-      
-      <div class="input-group">
-        <label for="massRange">Trolley Mass (m)</label>
-        <div class="slider-row">
-          <input id="massRange" type="range" min="0.5" max="10" step="0.5" value="1.0">
-          <input id="massInput" type="number" min="0.5" max="10" step="0.5" value="1.0">
-          <span style="font-size: 0.85rem; font-weight: 700;">kg</span>
-        </div>
-      </div>
 
-      <div class="input-group">
-        <label>Launch Velocity (v)</label>
-        <div class="metric-badge">2.0 m/s</div>
-      </div>
+  <!-- Section 1: Controls -->
+  <div class="card">
+    <h2><span class="step-num">1</span> Setup Parameters</h2>
+    <div class="controls-grid">
+      
+      <div class="input-group">
+        <label for="massRange">Trolley Mass (m)</label>
+        <div class="slider-row">
+          <input id="massRange" type="range" min="0.5" max="10" step="0.5" value="1.0">
+          <input id="massInput" type="number" min="0.5" max="10" step="0.5" value="1.0">
+          <span style="font-size: 0.85rem; font-weight: 700;">kg</span>
+        </div>
+      </div>
 
-      <div class="input-group">
-        <label>Measured Rebound Distance</label>
-        <div class="metric-badge hidden-state" id="reboundVal">??? [Awaiting Rebound]</div>
-      </div>
 
-      <div class="btn-group">
-        <button id="startBtn" class="primary">
-          <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M10.804 8 5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z"/></svg>
-          Launch Trolley
-        </button>
-        <button id="resetBtn" class="danger">Reset Track</button>
-      </div>
+      <div class="input-group">
+        <label>Launch Velocity (v)</label>
+        <div class="metric-badge">2.0 m/s</div>
+      </div>
 
-    </div>
-    <p class="note">💡 Physics note: Heavier trolleys carry greater kinetic energy into the spring barrier, pushing the spring deeper and storing more potential energy for the bounce!</p>
-  </div>
 
-  <!-- Section 2: Motion Simulation Track & Energy Chart -->
-  <div class="card">
-    <h2><span class="step-num">2</span> Dynamics Simulation Track</h2>
-    <div class="track-wrapper" id="trackWrapper">
-      <div class="track-grid"></div>
-      <div class="start-line"></div>
-      
-      <!-- Track Ruler Scale -->
-      <div class="ruler-track" id="rulerTrack"></div>
+      <div class="input-group">
+        <label>Measured Rebound Distance</label>
+        <div class="metric-badge hidden-state" id="reboundVal">??? [Awaiting Rebound]</div>
+      </div>
 
-      <!-- Dimension Line for Rebound Distance -->
-      <div class="rebound-measure-line" id="measureLine">
-        <div class="rebound-label" id="reboundLabel">Rebound: 0 cm</div>
-      </div>
-      
-      <!-- Tech Lab Trolley -->
-      <div class="trolley-container" id="trolley">
-        <div class="ballast-rack" id="ballastRack"></div>
-        
-        <svg viewBox="0 0 160 70" width="150" height="75">
-          <!-- Main Chassis Frame -->
-          <rect x="15" y="32" width="125" height="16" fill="#1e293b" rx="4" stroke="#475569" stroke-width="2"/>
-          <rect x="22" y="36" width="111" height="8" fill="#0f172a" rx="2"/>
-          
-          <!-- Side Pillars for Mass Plate Holder -->
-          <rect x="28" y="16" width="6" height="18" fill="#64748b" rx="1"/>
-          <rect x="120" y="16" width="6" height="18" fill="#64748b" rx="1"/>
-          <rect x="26" y="14" width="102" height="4" fill="#06b6d4" rx="1"/>
-          
-          <!-- Front Impact Bumper Sensor -->
-          <path d="M 140,28 L 152,28 A 6 6 0 0 1 158,34 L 158,46 A 6 6 0 0 1 152,52 L 140,52 Z" fill="#ef4444"/>
-          <circle cx="148" cy="40" r="3" fill="#fef08a"/>
 
-          <!-- Rear Mount -->
-          <rect x="8" y="34" width="8" height="12" fill="#334155" rx="2"/>
-          
-          <!-- Alloy Wheels -->
-          <g id="wheelRear">
-            <circle cx="38" cy="52" r="12" fill="#090d16" stroke="#06b6d4" stroke-width="2.5"/>
-            <circle cx="38" cy="52" r="5" fill="#64748b"/>
-            <line x1="38" y1="42" x2="38" y2="62" stroke="#cbd5e1" stroke-width="1.5"/>
-            <line x1="28" y1="52" x2="48" y2="52" stroke="#cbd5e1" stroke-width="1.5"/>
-          </g>
-          
-          <g id="wheelFront">
-            <circle cx="116" cy="52" r="12" fill="#090d16" stroke="#06b6d4" stroke-width="2.5"/>
-            <circle cx="116" cy="52" r="5" fill="#64748b"/>
-            <line x1="116" y1="42" x2="116" y2="62" stroke="#cbd5e1" stroke-width="1.5"/>
-            <line x1="106" y1="52" x2="126" y2="52" stroke="#cbd5e1" stroke-width="1.5"/>
-          </g>
-        </svg>
-      </div>
+      <div class="btn-group">
+        <button id="startBtn" class="primary">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M10.804 8 5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z"/></svg>
+          Launch Trolley
+        </button>
+        <button id="resetBtn" class="danger">Reset Track</button>
+      </div>
 
-      <!-- Spring Barrier -->
-      <div class="barrier-container">
-        <svg class="barrier-spring" id="barrierSpring" viewBox="0 0 20 40">
-          <path d="M 20,5 L 10,10 L 20,15 L 10,20 L 20,25 L 10,30 L 20,35" fill="none" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
-        </svg>
-        <div class="barrier-block"></div>
-      </div>
 
-      <div class="impact-shockwave" id="shockwave"></div>
-      <div class="track-floor"></div>
-    </div>
+    </div>
+    <p class="note">💡 Physics note: Heavier trolleys carry greater kinetic energy into the spring barrier, pushing the spring deeper and storing more potential energy for the bounce!</p>
+  </div>
 
-    <!-- Energy Analytics Bar Chart -->
-    <div class="mt-4 p-4 bg-slate-900/60 rounded-lg border border-slate-800">
-      <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Live Energy Transfer Breakdown</div>
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <div class="flex justify-between text-xs mb-1">
-            <span class="text-cyan-400 font-semibold">Kinetic Energy (E_k)</span>
-            <span id="keVal" class="text-slate-300 font-mono">0.0 J</span>
-          </div>
-          <div class="h-4 bg-slate-800 rounded overflow-hidden">
-            <div id="keBar" class="h-full bg-cyan-500 transition-all duration-75" style="width: 0%"></div>
-          </div>
-        </div>
-        <div>
-          <div class="flex justify-between text-xs mb-1">
-            <span class="text-amber-400 font-semibold">Elastic Potential (E_p)</span>
-            <span id="peVal" class="text-slate-300 font-mono">0.0 J</span>
-          </div>
-          <div class="h-4 bg-slate-800 rounded overflow-hidden">
-            <div id="peBar" class="h-full bg-amber-500 transition-all duration-75" style="width: 0%"></div>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <div class="status-bar mt-3">
-      <span class="status-dot" id="statusDot"></span>
-      <span id="status">Select trolley mass and launch vehicle.</span>
-    </div>
-  </div>
-  <!-- Section 3: Scientific Conclusion -->
-  <div class="card">
-    <h2><span class="step-num">4</span> Scientific Analysis</h2>
-    <div class="conclusion-box" id="conclusion">
-      Launch trolleys with different masses to observe how mass influences kinetic energy, spring compression, and the resulting rebound distance.
-    </div>
-  </div>
+  <!-- Section 2: Motion Simulation Track -->
+  <div class="card">
+    <h2><span class="step-num">2</span> Dynamics Simulation Track</h2>
+    <div class="track-wrapper" id="trackWrapper">
+      <div class="track-grid"></div>
+      <div class="start-line"></div>
+      
+      <!-- Track Ruler Scale -->
+      <div class="ruler-track" id="rulerTrack"></div>
+
+
+      <!-- Dimension Line for Rebound Distance -->
+      <div class="rebound-measure-line" id="measureLine">
+        <div class="rebound-label" id="reboundLabel">Rebound: 0 cm</div>
+      </div>
+      
+      <!-- Tech Lab Trolley -->
+      <div class="trolley-container" id="trolley">
+        <div class="ballast-rack" id="ballastRack"></div>
+        
+        <svg viewBox="0 0 160 70" width="150" height="75">
+          <!-- Main Chassis Frame -->
+          <rect x="15" y="32" width="125" height="16" fill="#1e293b" rx="4" stroke="#475569" stroke-width="2"/>
+          <rect x="22" y="36" width="111" height="8" fill="#0f172a" rx="2"/>
+          
+          <!-- Side Pillars for Mass Plate Holder -->
+          <rect x="28" y="16" width="6" height="18" fill="#64748b" rx="1"/>
+          <rect x="120" y="16" width="6" height="18" fill="#64748b" rx="1"/>
+          <rect x="26" y="14" width="102" height="4" fill="#06b6d4" rx="1"/>
+          
+          <!-- Front Impact Bumper Sensor -->
+          <path d="M 140,28 L 152,28 A 6 6 0 0 1 158,34 L 158,46 A 6 6 0 0 1 152,52 L 140,52 Z" fill="#ef4444"/>
+          <circle cx="148" cy="40" r="3" fill="#fef08a"/>
+
+
+          <!-- Rear Mount -->
+          <rect x="8" y="34" width="8" height="12" fill="#334155" rx="2"/>
+          
+          <!-- Alloy Wheels -->
+          <g id="wheelRear">
+            <circle cx="38" cy="52" r="12" fill="#090d16" stroke="#06b6d4" stroke-width="2.5"/>
+            <circle cx="38" cy="52" r="5" fill="#64748b"/>
+            <line x1="38" y1="42" x2="38" y2="62" stroke="#cbd5e1" stroke-width="1.5"/>
+            <line x1="28" y1="52" x2="48" y2="52" stroke="#cbd5e1" stroke-width="1.5"/>
+          </g>
+          
+          <g id="wheelFront">
+            <circle cx="116" cy="52" r="12" fill="#090d16" stroke="#06b6d4" stroke-width="2.5"/>
+            <circle cx="116" cy="52" r="5" fill="#64748b"/>
+            <line x1="116" y1="42" x2="116" y2="62" stroke="#cbd5e1" stroke-width="1.5"/>
+            <line x1="106" y1="52" x2="126" y2="52" stroke="#cbd5e1" stroke-width="1.5"/>
+          </g>
+        </svg>
+      </div>
+
+
+      <!-- Spring Barrier -->
+      <div class="barrier-container">
+        <svg class="barrier-spring" id="barrierSpring" viewBox="0 0 20 40">
+          <path d="M 20,5 L 10,10 L 20,15 L 10,20 L 20,25 L 10,30 L 20,35" fill="none" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <div class="barrier-block"></div>
+      </div>
+
+
+      <div class="impact-shockwave" id="shockwave"></div>
+      <div class="track-floor"></div>
+    </div>
+
+
+    <div class="status-bar">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="status">Select trolley mass and launch vehicle.</span>
+    </div>
+  </div>
+
+
+  <!-- Section 3: Scientific Conclusion -->
+  <div class="card">
+    <h2><span class="step-num">3</span> Scientific Analysis</h2>
+    <div class="conclusion-box" id="conclusion">
+      Launch trolleys with different masses to observe how mass influences kinetic energy, spring compression, and the resulting rebound distance.
+    </div>
+  </div>
 </div>
 
+
 <script>
-  // DOM Elements
-  const massRange = document.getElementById('massRange');
-  const massInput = document.getElementById('massInput');
-  const reboundVal = document.getElementById('reboundVal');
-  const trolley = document.getElementById('trolley');
-  const ballastRack = document.getElementById('ballastRack');
-  const wheelRear = document.getElementById('wheelRear');
-  const wheelFront = document.getElementById('wheelFront');
-  const shockwave = document.getElementById('shockwave');
-  const barrierSpring = document.getElementById('barrierSpring');
-  const measureLine = document.getElementById('measureLine');
-  const reboundLabel = document.getElementById('reboundLabel');
-  const rulerTrack = document.getElementById('rulerTrack');
-  const statusEl = document.getElementById('status');
-  const statusDot = document.getElementById('statusDot');
-  const startBtn = document.getElementById('startBtn');
-  const resetBtn = document.getElementById('resetBtn');
-  const conclusionEl = document.getElementById('conclusion');
+  // DOM Elements
+  const massRange = document.getElementById('massRange');
+  const massInput = document.getElementById('massInput');
+  const reboundVal = document.getElementById('reboundVal');
+  const trolley = document.getElementById('trolley');
+  const ballastRack = document.getElementById('ballastRack');
+  const wheelRear = document.getElementById('wheelRear');
+  const wheelFront = document.getElementById('wheelFront');
+  const shockwave = document.getElementById('shockwave');
+  const barrierSpring = document.getElementById('barrierSpring');
+  const measureLine = document.getElementById('measureLine');
+  const reboundLabel = document.getElementById('reboundLabel');
+  const rulerTrack = document.getElementById('rulerTrack');
+  const statusEl = document.getElementById('status');
+  const statusDot = document.getElementById('statusDot');
+  const startBtn = document.getElementById('startBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const conclusionEl = document.getElementById('conclusion');
 
-  // Energy Analytics Elements
-  const keBar = document.getElementById('keBar');
-  const peBar = document.getElementById('peBar');
-  const keVal = document.getElementById('keVal');
-  const peVal = document.getElementById('peVal');
 
-  // Table & CSV Elements
-  const dataTableBody = document.getElementById('dataTableBody');
-  const emptyRow = document.getElementById('emptyRow');
-  const exportCsvBtn = document.getElementById('exportCsvBtn');
-  const clearDataBtn = document.getElementById('clearDataBtn');
+  const testedMasses = new Set();
+  let isAnimating = false;
 
-  const testedMasses = new Set();
-  const trialLogs = [];
-  let isAnimating = false;
-  let trialCounter = 0;
 
-  // Track Layout Percentages (aligned with start line 20% and barrier 85%)
-  const START_BUMPER_PCT = 20;
-  const IMPACT_BUMPER_PCT = 85;
-  const TRACK_SPAN_PCT = IMPACT_BUMPER_PCT - START_BUMPER_PCT; // 65%
+  // Track Layout Percentages (aligned with start line 20% and barrier 85%)
+  const START_BUMPER_PCT = 20;
+  const IMPACT_BUMPER_PCT = 85;
+  const TRACK_SPAN_PCT = IMPACT_BUMPER_PCT - START_BUMPER_PCT; // 65%
 
-  // Render Ruler ticks along track floor (0 cm to 100 cm)
-  function initRuler() {
-    rulerTrack.innerHTML = '';
-    for (let i = 0; i <= 100; i += 5) {
-      const tick = document.createElement('div');
-      const isMajor = (i % 20 === 0);
-      tick.className = `ruler-tick ${isMajor ? 'major' : ''}`;
-      if (isMajor) tick.setAttribute('data-cm', i);
-      rulerTrack.appendChild(tick);
-    }
-  }
-  initRuler();
 
-  // Sync controls and render mass plates
-  function renderWeights(mass) {
-    ballastRack.innerHTML = '';
-    const numPlates = Math.ceil(mass);
-    for (let i = 0; i < numPlates; i++) {
-      const plate = document.createElement('div');
-      plate.className = 'mass-block';
-      ballastRack.appendChild(plate);
-    }
-  }
+  // Render Ruler ticks along track floor (0 cm to 100 cm)
+  function initRuler() {
+    rulerTrack.innerHTML = '';
+    for (let i = 0; i <= 100; i += 5) {
+      const tick = document.createElement('div');
+      const isMajor = (i % 20 === 0);
+      tick.className = ruler-tick ${isMajor ? 'major' : ''};
+      if (isMajor) tick.setAttribute('data-cm', i);
+      rulerTrack.appendChild(tick);
+    }
+  }
+  initRuler();
 
-  function getValidMass() {
-    let mass = parseFloat(massInput.value);
-    if (isNaN(mass) || mass < 0.5) mass = 0.5;
-    if (mass > 10) mass = 10;
-    return mass;
-  }
 
-  massRange.addEventListener('input', (e) => {
-    const val = parseFloat(e.target.value);
-    massInput.value = val;
-    renderWeights(val);
-    resetSimulationState();
-  });
+  // Sync controls and render mass plates
+  function renderWeights(mass) {
+    ballastRack.innerHTML = '';
+    const numPlates = Math.ceil(mass);
+    for (let i = 0; i < numPlates; i++) {
+      const plate = document.createElement('div');
+      plate.className = 'mass-block';
+      ballastRack.appendChild(plate);
+    }
+  }
 
-  massInput.addEventListener('input', () => {
-    const mass = parseFloat(massInput.value);
-    if (!isNaN(mass) && mass >= 0.5 && mass <= 10) {
-      massRange.value = mass;
-      renderWeights(mass);
-    }
-    resetSimulationState();
-  });
 
-  massInput.addEventListener('blur', () => {
-    const mass = getValidMass();
-    massInput.value = mass;
-    massRange.value = mass;
-    renderWeights(mass);
-  });
+  function getValidMass() {
+    let mass = parseFloat(massInput.value);
+    if (isNaN(mass) || mass < 0.5) mass = 0.5;
+    if (mass > 10) mass = 10;
+    return mass;
+  }
 
-  function resetSimulationState() {
-    reboundVal.textContent = "??? [Awaiting Rebound]";
-    reboundVal.className = "metric-badge hidden-state";
-    measureLine.classList.remove('visible');
-    trolley.style.left = "calc(20% - 150px)";
-    wheelRear.setAttribute('transform', 'rotate(0, 38, 52)');
-    wheelFront.setAttribute('transform', 'rotate(0, 116, 52)');
-    updateEnergyBars(0, 0, 20);
-  }
 
-  function updateEnergyBars(ke, pe, maxEnergy = 20) {
-    const kePct = Math.min(100, (ke / maxEnergy) * 100);
-    const pePct = Math.min(100, (pe / maxEnergy) * 100);
-    keBar.style.width = `${kePct}%`;
-    peBar.style.width = `${pePct}%`;
-    keVal.textContent = `${ke.toFixed(1)} J`;
-    peVal.textContent = `${pe.toFixed(1)} J`;
-  }
+  massRange.addEventListener('input', (e) => {
+    const val = parseFloat(e.target.value);
+    massInput.value = val;
+    renderWeights(val);
+    resetSimulationState();
+  });
 
-  // Main Simulation Animation Sequence
-  function runSimulation() {
-    if (isAnimating) return;
-    isAnimating = true;
 
-    const mass = getValidMass();
-    const velocity = 2.0; // m/s
-    const maxKE = 0.5 * mass * (velocity ** 2);
+  massInput.addEventListener('input', () => {
+    const mass = parseFloat(massInput.value);
+    if (!isNaN(mass) && mass >= 0.5 && mass <= 10) {
+      massRange.value = mass;
+      renderWeights(mass);
+    }
+    resetSimulationState();
+  });
 
-    massInput.value = mass;
-    massRange.value = mass;
 
-    measureLine.classList.remove('visible');
-    reboundVal.textContent = "Measuring...";
-    reboundVal.className = "metric-badge hidden-state";
-    startBtn.disabled = true;
+  massInput.addEventListener('blur', () => {
+    const mass = getValidMass();
+    massInput.value = mass;
+    massRange.value = mass;
+    renderWeights(mass);
+  });
 
-    statusDot.className = "status-dot active";
-    statusEl.textContent = "Trolley accelerating towards barrier at 2.0 m/s...";
 
-    // Physics formula for Rebound Distance (cm):
-    const reboundCm = Math.min(100, 10 + (mass * 8.5)); 
+  function resetSimulationState() {
+    reboundVal.textContent = "??? [Awaiting Rebound]";
+    reboundVal.className = "metric-badge hidden-state";
+    measureLine.classList.remove('visible');
+    trolley.style.left = "calc(20% - 150px)";
+    wheelRear.setAttribute('transform', 'rotate(0, 38, 52)');
+    wheelFront.setAttribute('transform', 'rotate(0, 116, 52)');
+  }
 
-    // Calculate position percentages
-    const startBumper = START_BUMPER_PCT; // 20%
-    const impactBumper = IMPACT_BUMPER_PCT; // 85%
-    const reboundPercent = (reboundCm / 100) * TRACK_SPAN_PCT;
-    const stoppedBumper = impactBumper - reboundPercent;
 
-    const approachDuration = 1600; // ms
-    const reboundDuration = 1400;  // ms
-    const startTime = performance.now();
+  // Main Simulation Animation Sequence
+  function runSimulation() {
+    if (isAnimating) return;
+    isAnimating = true;
 
-    // Phase 1: Forward approach to barrier
-    function animateForward(currentTime) {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / approachDuration, 1);
-      const currentBumper = startBumper + (impactBumper - startBumper) * progress;
-      
-      trolley.style.left = `calc(${currentBumper}% - 150px)`;
 
-      // Rotate wheel spokes forward
-      const rotationDeg = progress * 900;
-      wheelRear.setAttribute('transform', `rotate(${rotationDeg}, 38, 52)`);
-      wheelFront.setAttribute('transform', `rotate(${rotationDeg}, 116, 52)`);
+    const mass = getValidMass();
+    massInput.value = mass;
+    massRange.value = mass;
 
-      // Update energy readout during forward motion
-      updateEnergyBars(maxKE, 0, Math.max(20, maxKE));
 
-      if (progress < 1) {
-        requestAnimationFrame(animateForward);
-      } else {
-        triggerImpactAndRebound(mass, reboundCm, maxKE, impactBumper, stoppedBumper, reboundDuration);
-      }
-    }
+    measureLine.classList.remove('visible');
+    reboundVal.textContent = "Measuring...";
+    reboundVal.className = "metric-badge hidden-state";
+    startBtn.disabled = true;
 
-    requestAnimationFrame(animateForward);
-  }
 
-  // Phase 2: Impact Compression & Rebound Backwards
-  function triggerImpactAndRebound(mass, reboundCm, maxKE, impactBumper, stoppedBumper, reboundDuration) {
-    shockwave.classList.add('active');
-    barrierSpring.style.transform = `scaleX(${Math.max(0.2, 1 - mass * 0.08)})`;
+    statusDot.className = "status-dot active";
+    statusEl.textContent = "Trolley accelerating towards barrier at 2.0 m/s...";
 
-    // Energy shifts to Elastic Potential Energy during max compression
-    updateEnergyBars(0, maxKE, Math.max(20, maxKE));
 
-    setTimeout(() => {
-      shockwave.classList.remove('active');
-      barrierSpring.style.transform = "scaleX(1)";
-    }, 200);
+    // Physics formula for Rebound Distance (cm):
+    const reboundCm = Math.min(100, 10 + (mass * 8.5)); 
 
-    statusEl.textContent = "💥 Impact! Kinetic energy transferred to spring. Rebounding...";
 
-    const reboundStartTime = performance.now();
+    // Calculate position percentages
+    const startBumper = START_BUMPER_PCT; // 20%
+    const impactBumper = IMPACT_BUMPER_PCT; // 85%
+    const reboundPercent = (reboundCm / 100) * TRACK_SPAN_PCT; // distance in track percentage
+    const stoppedBumper = impactBumper - reboundPercent;
 
-    // Phase 3: Backward Rebound Animation (with friction damping)
-    function animateRebound(currentTime) {
-      const elapsed = currentTime - reboundStartTime;
-      const progress = Math.min(elapsed / reboundDuration, 1);
-      
-      const easeOut = 1 - Math.pow(1 - progress, 2);
-      const currentBumper = impactBumper - (impactBumper - stoppedBumper) * easeOut;
 
-      trolley.style.left = `calc(${currentBumper}% - 150px)`;
+    const approachDuration = 1600; // ms
+    const reboundDuration = 1400;  // ms
+    const startTime = performance.now();
 
-      // Rotate wheel spokes backwards
-      const rotationDeg = 900 - (easeOut * 600);
-      wheelRear.setAttribute('transform', `rotate(${rotationDeg}, 38, 52)`);
-      wheelFront.setAttribute('transform', `rotate(${rotationDeg}, 116, 52)`);
 
-      // Energy dissipates as trolley comes to rest
-      const remainingKE = maxKE * (1 - easeOut);
-      updateEnergyBars(remainingKE, 0, Math.max(20, maxKE));
+    // Phase 1: Forward approach to barrier
+    function animateForward(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / approachDuration, 1);
+      const currentBumper = startBumper + (impactBumper - startBumper) * progress;
+      
+      trolley.style.left = calc(${currentBumper}% - 150px);
 
-      if (progress < 1) {
-        requestAnimationFrame(animateRebound);
-      } else {
-        finishRebound(mass, reboundCm, maxKE, impactBumper, stoppedBumper);
-      }
-    }
 
-    requestAnimationFrame(animateRebound);
-  }
+      // Rotate wheel spokes forward
+      const rotationDeg = progress * 900;
+      wheelRear.setAttribute('transform', rotate(${rotationDeg}, 38, 52));
+      wheelFront.setAttribute('transform', rotate(${rotationDeg}, 116, 52));
 
-  // Phase 4: Display Dimension Line, Data Logging & Telemetry
-  function finishRebound(mass, reboundCm, maxKE, impactBumper, stoppedBumper) {
-    isAnimating = false;
-    startBtn.disabled = false;
 
-    // Update Rebound Readout Badge
-    reboundVal.textContent = reboundCm.toFixed(1) + " cm";
-    reboundVal.className = "metric-badge revealed";
+      if (progress < 1) {
+        requestAnimationFrame(animateForward);
+      } else {
+        triggerImpactAndRebound(mass, reboundCm, impactBumper, stoppedBumper, reboundDuration);
+      }
+    }
 
-    // Show Visual Measurement Dimension Line on Track
-    measureLine.style.left = stoppedBumper + "%";
-    measureLine.style.width = (impactBumper - stoppedBumper) + "%";
-    reboundLabel.textContent = `Rebound: ${reboundCm.toFixed(1)} cm`;
-    measureLine.classList.add('visible');
 
-    statusDot.className = "status-dot impact";
-    statusEl.textContent = `✅ Measurement complete! Mass: ${mass.toFixed(1)} kg → Rebound Distance: ${reboundCm.toFixed(1)} cm.`;
+    requestAnimationFrame(animateForward);
+  }
 
-    // Append to Data Log Table
-    logTrialData(mass, 2.0, maxKE, reboundCm);
 
-    // Track tested values for scientific conclusion update
-    testedMasses.add(mass);
-    if (testedMasses.size >= 3) {
-      conclusionEl.className = "conclusion-box ready";
-      conclusionEl.innerHTML = `<strong>Scientific Conclusion:</strong> As trolley mass increases at a constant velocity (v = 2.0 m/s), its initial kinetic energy increases (E_k = ½ m v²). This compresses the spring barrier further upon impact, causing the trolley to bounce back with a <strong>greater rebound distance</strong>.`;
-    } else {
-      conclusionEl.textContent = `Recorded ${testedMasses.size} trial(s). Test at least ${3 - testedMasses.size} more different mass setting(s) to confirm the mathematical trend!`;
-    }
-  }
+  // Phase 2: Impact Compression & Rebound Backwards
+  function triggerImpactAndRebound(mass, reboundCm, impactBumper, stoppedBumper, reboundDuration) {
+    // Visual Impact Shockwave & Barrier Compression
+    shockwave.classList.add('active');
+    barrierSpring.style.transform = scaleX(${Math.max(0.2, 1 - mass * 0.08)});
 
-  // Log Trial into Table
-  function logTrialData(mass, velocity, ke, rebound) {
-    trialCounter++;
-    if (emptyRow) emptyRow.remove();
 
-    const record = {
-      trial: trialCounter,
-      mass: mass.toFixed(1),
-      velocity: velocity.toFixed(1),
-      ke: ke.toFixed(2),
-      rebound: rebound.toFixed(1)
-    };
-    trialLogs.push(record);
+    setTimeout(() => {
+      shockwave.classList.remove('active');
+      barrierSpring.style.transform = "scaleX(1)";
+    }, 200);
 
-    const tr = document.createElement('tr');
-    tr.className = "hover:bg-slate-800/40 transition-colors";
-    tr.innerHTML = `
-      <td class="py-2 px-3 text-cyan-400 font-bold">#${record.trial}</td>
-      <td class="py-2 px-3">${record.mass}</td>
-      <td class="py-2 px-3">${record.velocity}</td>
-      <td class="py-2 px-3">${record.ke}</td>
-      <td class="py-2 px-3 text-amber-400 font-bold">${record.rebound}</td>
-    `;
-    dataTableBody.appendChild(tr);
-  }
 
-  // Export CSV Handler
-  exportCsvBtn.addEventListener('click', () => {
-    if (trialLogs.length === 0) {
-      alert("No data recorded to export. Please run a trial first!");
-      return;
-    }
+    statusEl.textContent = "💥 Impact! Kinetic energy transferred to spring. Rebounding...";
 
-    let csvContent = "Trial,Mass (kg),Velocity (m/s),Kinetic Energy (J),Rebound Distance (cm)\n";
-    trialLogs.forEach(row => {
-      csvContent += `${row.trial},${row.mass},${row.velocity},${row.ke},${row.rebound}\n`;
-    });
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'Trolley_Collision_Lab_Data.csv');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  });
+    const reboundStartTime = performance.now();
 
-  // Clear Data Table
-  clearDataBtn.addEventListener('click', () => {
-    trialLogs.length = 0;
-    trialCounter = 0;
-    dataTableBody.innerHTML = `
-      <tr id="emptyRow">
-        <td colspan="5" class="py-4 text-center text-slate-500 italic font-sans">No trials recorded yet. Launch the trolley to log data.</td>
-      </tr>
-    `;
-  });
 
-  startBtn.addEventListener('click', runSimulation);
+    // Phase 3: Backward Rebound Animation (with friction damping)
+    function animateRebound(currentTime) {
+      const elapsed = currentTime - reboundStartTime;
+      const progress = Math.min(elapsed / reboundDuration, 1);
+      
+      // Deceleration easing curve
+      const easeOut = 1 - Math.pow(1 - progress, 2);
+      const currentBumper = impactBumper - (impactBumper - stoppedBumper) * easeOut;
 
-  resetBtn.addEventListener('click', () => {
-    testedMasses.clear();
-    isAnimating = false;
-    startBtn.disabled = false;
-    statusEl.textContent = "Track reset. Select trolley mass and launch vehicle.";
-    statusDot.className = "status-dot";
-    conclusionEl.className = "conclusion-box";
-    conclusionEl.textContent = "Launch trolleys with different masses to observe how mass influences kinetic energy, spring compression, and the resulting rebound distance.";
-    resetSimulationState();
-    renderWeights(getValidMass());
-  });
 
-  // Initial setup
-  renderWeights(1.0);
-  resetSimulationState();
+      trolley.style.left = calc(${currentBumper}% - 150px);
+
+
+      // Rotate wheel spokes backwards
+      const rotationDeg = 900 - (easeOut * 600);
+      wheelRear.setAttribute('transform', rotate(${rotationDeg}, 38, 52));
+      wheelFront.setAttribute('transform', rotate(${rotationDeg}, 116, 52));
+
+
+      if (progress < 1) {
+        requestAnimationFrame(animateRebound);
+      } else {
+        finishRebound(mass, reboundCm, impactBumper, stoppedBumper);
+      }
+    }
+
+
+    requestAnimationFrame(animateRebound);
+  }
+
+
+  // Phase 4: Display Dimension Line & Telemetry
+  function finishRebound(mass, reboundCm, impactBumper, stoppedBumper) {
+    isAnimating = false;
+    startBtn.disabled = false;
+
+
+    // Update Rebound Readout Badge
+    reboundVal.textContent = reboundCm.toFixed(1) + " cm";
+    reboundVal.className = "metric-badge revealed";
+
+
+    // Show Visual Measurement Dimension Line on Track
+    measureLine.style.left = stoppedBumper + "%";
+    measureLine.style.width = (impactBumper - stoppedBumper) + "%";
+    reboundLabel.textContent = Rebound: ${reboundCm.toFixed(1)} cm;
+    measureLine.classList.add('visible');
+
+
+    statusDot.className = "status-dot impact";
+    statusEl.textContent = ✅ Measurement complete! Mass: ${mass.toFixed(1)} kg → Rebound Distance: ${reboundCm.toFixed(1)} cm.;
+
+
+    // Track tested values for scientific conclusion update
+    testedMasses.add(mass);
+    if (testedMasses.size >= 3) {
+      conclusionEl.className = "conclusion-box ready";
+      conclusionEl.innerHTML = <strong>Scientific Conclusion:</strong> As trolley mass increases at a constant velocity (v = 2.0 m/s), its initial kinetic energy increases (E_k = ½ m v²). This compresses the spring barrier further upon impact, causing the trolley to bounce back with a <strong>greater rebound distance</strong>.;
+    } else {
+      conclusionEl.textContent = Recorded ${testedMasses.size} trial(s). Test at least ${3 - testedMasses.size} more different mass setting(s) to confirm the mathematical trend!;
+    }
+  }
+
+
+  startBtn.addEventListener('click', runSimulation);
+
+
+  resetBtn.addEventListener('click', () => {
+    testedMasses.clear();
+    isAnimating = false;
+    startBtn.disabled = false;
+    statusEl.textContent = "Track reset. Select trolley mass and launch vehicle.";
+    statusDot.className = "status-dot";
+    conclusionEl.className = "conclusion-box";
+    conclusionEl.textContent = "Launch trolleys with different masses to observe how mass influences kinetic energy, spring compression, and the resulting rebound distance.";
+    resetSimulationState();
+    renderWeights(getValidMass());
+  });
+
+
+  // Initial setup
+  renderWeights(1.0);
+  resetSimulationState();
 </script>
+
 
 </body>
 </html>
